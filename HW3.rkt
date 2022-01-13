@@ -1,5 +1,15 @@
 #lang plait
 
+; Begin Helper Functions
+(pow : (Number Number -> Number))
+(define (pow base ex)
+	(if (< ex 1)
+		1
+		(* base (pow base (- ex 1)))
+	)
+)
+; End Helper Functions
+
 (compose-func : (('b -> 'c) ('a -> 'b) -> ('a -> 'c)))
 (define (compose-func after before)
 	(lambda (a) (after (before a)))
@@ -105,5 +115,108 @@
 (test (add-last-name dad "Johnson") (person "John Johnson" 1968 'brown (unknown) (unknown)))
 (test (add-last-name mom "Carlson") (person "Becca Carlson" 1970 'hazel (person "James Carlson" 1930 'hazel (unknown) (unknown)) (unknown)))
 (test (add-last-name me "Anderson") (person "Caleb Anderson" 2000 'brown (person "John Anderson" 1968 'brown (unknown) (unknown)) (person "Becca Anderson" 1970 'hazel (person "James Anderson" 1930 'hazel (unknown) (unknown)) (unknown))))
+|#
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Refactoring old functions ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(check-temperate : ((Listof Number) -> Boolean))
+(define (check-temperate temps)
+	(foldr 
+		(lambda ([x : Number] [b : Boolean]) (and b (and (>= x 5) (<= x 95))))
+		#true
+		temps
+	)
+)
+
+#|
+(test (check-temperate (list 15 30 50))                #true)
+(test (check-temperate (list 4 30 50))                 #false)
+(test (check-temperate (list))                         #true)
+(test (check-temperate (list 4 1000 96 96 95))         #false)
+(test (check-temperate (list -1 3 4 96 97 98 99 100))  #false)
+|#
+
+(check-temps : ((Listof Number) Number Number -> Boolean))
+(define (check-temps temps low high)
+	(foldr 
+		(lambda ([x : Number] [b : Boolean]) (and b (and (>= x low) (<= x high))))
+		#true
+		temps
+	)
+)
+
+#|
+(test (check-temps (list 15 30 50) 0 170)                #true)
+(test (check-temps (list 4 30 50) 100 1000)              #false)
+(test (check-temps (list) -100 500)                      #true)
+(test (check-temps (list 4 1000 96 96 95) 40 90)         #false)
+(test (check-temps (list -1 3 4 96 97 98 99 100) -1 100) #true)
+|#
+
+(convert : ((Listof Number) -> Number))
+(define (convert nums)
+	(foldr
+		(lambda ([x : Number] [y : Number]) (+ (* y 10) x))
+		0
+		nums
+	)
+)
+
+#|
+(test (convert '(1 2 3)) 321)
+(test (convert '()) 0)
+(test (convert '( 0 0 0 2 4 0 8 0 )) 08042000)
+(test (convert '(0 0 1 0 0)) 100)
+|#
+
+(average-price : ((Listof Number) -> Number))
+(define (average-price prices)
+	(let ([count (length prices)])
+		(if
+				(= count 0)
+				0
+				(/ (foldr + 0 prices) count)
+		)
+	)
+)
+
+#|
+(test (average-price '(1)) 1)
+(test (average-price '()) 0)
+(test (average-price '(0 0 0)) 0)
+(test (average-price '(1 3)) 2)
+(test (average-price '(10 20 30 40 50 60)) 35)
+(test (average-price '(12.2 15.8 -1 0.1 0.25 100 -100)) 3.907142857142856)
+|#
+
+(convertFC : ((Listof Number) -> (Listof Number)))
+(define (convertFC fs)
+	(map f-to-c fs)
+)
+
+; (F − 32) × 5/9 = C
+(f-to-c : (Number -> Number))
+(define (f-to-c f)
+	(* (- f 32) 5/9)
+)
+
+#|
+(test (convertFC '(-40 32 212)) '(-40 0 100))
+(test (convertFC empty) empty)
+(test (convertFC '(32 32 32 32)) '(0 0 0 0))
+|#
+
+(eliminate-exp : (Number (Listof Number) -> (Listof Number)))
+(define (eliminate-exp high prices)
+	(filter (lambda (num) (<= num high)) prices)
+)
+
+#|
+(test (eliminate-exp 5 '(1 2 3 4)) '(1 2 3 4))
+(test (eliminate-exp 5 '(10)     ) '()       )
+(test (eliminate-exp 15.51 '(15 15.5 15.51 15.52 16 100 -1)) '(15 15.5 15.51 -1))
+(test (eliminate-exp 0 (list)) (list))
 |#
 
