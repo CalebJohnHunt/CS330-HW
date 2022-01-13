@@ -9,14 +9,5 @@
   )
 )
 
-(applyto : (('a -> 'b) (Listof 'a) -> (Listof 'b)))
-(define (applyto func aList)
-  (type-case (Listof 'a) aList
-    [empty empty]
-    [(cons x rest-x)
-      (cons (func x) (applyto func rest-x))
-    ]
-  )
-)
 ; End of Helper Functins
 
